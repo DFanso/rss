@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// Parse command line flags
-	port := flag.Int("port", 8080, "HTTP server port")
+	port := flag.Int("port", 3030, "HTTP server port")
 	defaultFeeds := flag.String("feeds", "", "Comma-separated list of default RSS feed URLs")
 	dataDir := flag.String("data", "data", "Directory to store data files")
 	flag.Parse()
