@@ -1,0 +1,81 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.feed-item {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.feed-item:hover {
+    background-color: #f1f3f5;
+}
+
+.feed-item.active {
+    background-color: #e9ecef;
+    border-left: 4px solid #0d6efd;
+}
+
+.feed-title {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 70%;
+}
+
+#feed-content {
+    min-height: 400px;
+}
+
+.feed-item-entry {
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.feed-item-entry h5 {
+    margin-bottom: 10px;
+}
+
+.feed-item-entry:last-child {
+    border-bottom: none;
+}
+
+.feed-item-meta {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.feed-item-content {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.btn-sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+} 
