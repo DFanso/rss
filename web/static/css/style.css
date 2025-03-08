@@ -26,6 +26,22 @@ p, span, div, h1, h2, h3, h4, h5, h6, a:not(.btn), li, label, input, textarea {
     color: var(--text-primary);
 }
 
+/* Layout styles */
+.sidebar-column {
+    padding-left: 20px;
+}
+
+.content-column {
+    display: flex;
+    justify-content: center;
+}
+
+.content-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
 /* Spinning Animation */
 @keyframes spin {
     0% { transform: rotate(0deg); }
@@ -134,7 +150,14 @@ p, span, div, h1, h2, h3, h4, h5, h6, a:not(.btn), li, label, input, textarea {
 
 /* Feed Content Styles */
 #feed-content {
-    min-height: 400px;
+    min-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.feed-items-container {
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .feed-item-entry {
@@ -170,6 +193,14 @@ p, span, div, h1, h2, h3, h4, h5, h6, a:not(.btn), li, label, input, textarea {
     font-size: 0.95rem;
     line-height: 1.6;
     color: var(--text-primary);
+}
+
+/* Center images in feed content */
+.feed-item-content img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
 }
 
 /* Ensure all content inside feed items has proper text color */
@@ -264,9 +295,15 @@ p, span, div, h1, h2, h3, h4, h5, h6, a:not(.btn), li, label, input, textarea {
 
 /* Mobile Responsiveness Improvements */
 @media (max-width: 768px) {
-    .container {
-        padding-left: 1.25rem;
-        padding-right: 1.25rem;
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .sidebar-column,
+    .content-column {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
     }
     
     .feed-title {

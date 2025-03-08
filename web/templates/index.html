@@ -27,9 +27,9 @@
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <div class="row g-4">
-            <div class="col-lg-4 col-md-5">
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-lg-3 col-md-4 sidebar-column">
                 <div class="card mb-4">
                     <div class="card-header d-flex align-items-center">
                         <i class="bi bi-plus-circle me-2"></i>
@@ -70,17 +70,19 @@
                 </div>
             </div>
 
-            <div class="col-lg-8 col-md-7">
-                <div class="card">
-                    <div class="card-header d-flex align-items-center">
-                        <i class="bi bi-collection me-2"></i>
-                        <h5 id="current-feed-title">Select a Feed</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="feed-content">
-                            <div class="text-center text-muted py-5">
-                                <i class="bi bi-arrow-left-circle display-4 mb-3"></i>
-                                <p>Select a feed from the list to view its contents</p>
+            <div class="col-lg-9 col-md-8 content-column">
+                <div class="content-container">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center">
+                            <i class="bi bi-collection me-2"></i>
+                            <h5 id="current-feed-title">Select a Feed</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="feed-content">
+                                <div class="text-center text-muted py-5">
+                                    <i class="bi bi-arrow-left-circle display-4 mb-3"></i>
+                                    <p>Select a feed from the list to view its contents</p>
+                                </div>
                             </div>
                         </div>
                     </div>
