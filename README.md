@@ -8,6 +8,9 @@ A simple RSS reader and generator application built with Go.
 - Display feed content in a clean, modern UI
 - Export feeds in RSS format
 - Add, delete, and manage feeds
+- **Persistent storage of feeds in JSON format**
+- Dark mode support
+- Mobile-responsive design
 
 ## Requirements
 
@@ -52,6 +55,20 @@ You can also add default feeds at startup using the `-feeds` flag:
 ./rss-reader -feeds "https://news.ycombinator.com/rss,https://www.reddit.com/.rss"
 ```
 
+### Data Storage
+
+The application stores your feeds in a JSON file for persistence between restarts. By default, feeds are stored in `data/feeds.json`. You can specify a different data directory using the `-data` flag:
+
+```
+./rss-reader -data /path/to/data
+```
+
+The application will automatically:
+- Create the data directory if it doesn't exist
+- Load saved feeds when starting
+- Save feeds when they are added or removed
+- Provide feedback when feeds are saved or loaded
+
 ## Development
 
 The project structure is as follows:
@@ -61,14 +78,16 @@ The project structure is as follows:
 - `src/server`: HTTP server and API endpoints
 - `web/templates`: HTML templates
 - `web/static`: Static assets (CSS, JavaScript)
+- `data`: Feed storage (created at runtime)
 
 ## API Endpoints
 
+- `GET /`: Home page
 - `GET /feeds`: List all feeds
 - `POST /feeds`: Add a new feed
-- `GET /feeds/:url`: Get a specific feed
-- `DELETE /feeds/:url`: Remove a feed
-- `GET /export/:url`: Export a feed in RSS format
+- `GET /feed?url=...`: Get a specific feed
+- `DELETE /feed?url=...`: Remove a feed
+- `GET /export?url=...`: Export a feed in RSS format
 
 ## License
 

@@ -11,6 +11,7 @@
     --accent-hover: #0b5ed7;
     --danger-color: #dc3545;
     --danger-hover: #bb2d3b;
+    --highlight-color: rgba(13, 110, 253, 0.25);
 }
 
 body {
@@ -99,6 +100,17 @@ p, span, div, h1, h2, h3, h4, h5, h6, a:not(.btn), li, label, input, textarea {
 .feed-item.active {
     background-color: var(--bg-active);
     border-left: 4px solid var(--accent-color);
+}
+
+/* Highlight effect for existing feeds */
+@keyframes highlight-pulse {
+    0% { background-color: var(--bg-card); }
+    50% { background-color: var(--highlight-color); }
+    100% { background-color: var(--bg-card); }
+}
+
+.feed-item.highlight {
+    animation: highlight-pulse 2s ease;
 }
 
 .feed-title {

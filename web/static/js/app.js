@@ -5,7 +5,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const feedContent = document.getElementById('feed-content');
     const currentFeedTitle = document.getElementById('current-feed-title');
 
-    // Add a new feed
+    // Check if we have stored feeds
+    function checkStoredFeeds() {
+        const feedItems = document.querySelectorAll('.feed-item');
+        if (feedItems.length === 0) {
+            showToast('Welcome! Add your first RSS feed to get started', 'info');
+        } else {
+            showToast(`Loaded ${feedItems.length} saved feeds from storage`, 'success');
+        }
+    }
+
+    // Call this when the page loads
+    setTimeout(checkStoredFeeds, 500);
+
+    // Add a new feed with timeout
     addFeedForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const url = feedUrlInput.value.trim();
@@ -20,10 +33,18 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
         
+        // Set a timeout to prevent the UI from being stuck
+        const timeoutId = setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            showToast('Request is taking too long. The feed might still be added in the background. Please check your feed list in a moment.', 'warning');
+        }, 15000); // 15 seconds timeout
+        
         axios.post('/feeds', { url: url })
             .then(function(response) {
+                clearTimeout(timeoutId);
                 feedUrlInput.value = '';
-                showToast('Feed added successfully!', 'success');
+                showToast('Feed added successfully and saved to storage!', 'success');
                 
                 // Add the new feed to the list
                 const feed = response.data;
@@ -36,9 +57,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(function(error) {
-                showToast('Error adding feed: ' + (error.response?.data?.error || error.message), 'danger');
+                clearTimeout(timeoutId);
+                const errorMessage = error.response?.data?.error || error.message || 'Unknown error';
+                showToast('Error adding feed: ' + errorMessage, 'danger');
+                console.error('Feed addition error:', error);
             })
             .finally(function() {
+                clearTimeout(timeoutId);
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
             });
@@ -122,8 +147,19 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         
+        // Set a timeout for loading
+        const timeoutId = setTimeout(() => {
+            feedContent.innerHTML = `
+                <div class="text-center text-warning py-5">
+                    <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
+                    <p>Loading is taking longer than expected. Please be patient or try again later.</p>
+                </div>
+            `;
+        }, 10000); // 10 seconds timeout
+        
         axios.get('/feed', { params: { url: url } })
             .then(function(response) {
+                clearTimeout(timeoutId);
                 const feed = response.data;
                 currentFeedTitle.textContent = feed.Title;
                 
@@ -186,11 +222,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 100);
             })
             .catch(function(error) {
-                showToast('Error loading feed: ' + (error.response?.data?.error || error.message), 'danger');
+                clearTimeout(timeoutId);
+                const errorMessage = error.response?.data?.error || error.message || 'Unknown error';
+                showToast('Error loading feed: ' + errorMessage, 'danger');
+                console.error('Feed loading error:', error);
                 feedContent.innerHTML = `
                     <div class="text-center text-danger py-5">
                         <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
-                        <p>Error loading feed</p>
+                        <p>Error loading feed: ${errorMessage}</p>
                     </div>
                 `;
             });
@@ -198,43 +237,81 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Delete a feed - Updated to use query parameters
     function deleteFeed(url) {
-        if (confirm('Are you sure you want to delete this feed?')) {
-            axios.delete('/feed', { params: { url: url } })
-                .then(function() {
-                    // Remove the feed from the DOM
-                    const feedItem = document.querySelector(`.feed-item[data-url="${url}"]`);
-                    if (feedItem) {
-                        // Add animation before removing
-                        feedItem.style.transition = 'all 0.3s ease';
-                        feedItem.style.opacity = '0';
-                        feedItem.style.height = '0';
-                        
-                        setTimeout(() => {
-                            feedItem.remove();
-                        }, 300);
-                    }
+        if (confirm('Are you sure you want to delete this feed? This will remove it permanently from storage.')) {
+            const feedItem = document.querySelector(`.feed-item[data-url="${url}"]`);
+            if (feedItem) {
+                // Add "deleting" visual feedback
+                feedItem.classList.add('text-muted');
+                const deleteBtn = feedItem.querySelector('.delete-feed');
+                if (deleteBtn) {
+                    const originalContent = deleteBtn.innerHTML;
+                    deleteBtn.disabled = true;
+                    deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
                     
-                    // Clear feed content if it was the active feed
-                    if (feedItem && feedItem.classList.contains('active')) {
-                        currentFeedTitle.textContent = 'Select a Feed';
-                        feedContent.innerHTML = `
-                            <div class="text-center text-muted py-5">
-                                <i class="bi bi-arrow-left-circle display-4 mb-3"></i>
-                                <p>Select a feed from the list to view its contents</p>
-                            </div>
-                        `;
-                    }
+                    // Set a timeout
+                    const timeoutId = setTimeout(() => {
+                        feedItem.classList.remove('text-muted');
+                        deleteBtn.disabled = false;
+                        deleteBtn.innerHTML = originalContent;
+                        showToast('Delete request is taking too long. The server might still be processing it.', 'warning');
+                    }, 10000);
                     
-                    showToast('Feed deleted successfully!', 'success');
-                })
-                .catch(function(error) {
-                    showToast('Error deleting feed: ' + (error.response?.data?.error || error.message), 'danger');
-                });
+                    axios.delete('/feed', { params: { url: url } })
+                        .then(function() {
+                            clearTimeout(timeoutId);
+                            // Remove the feed from the DOM
+                            if (feedItem) {
+                                // Add animation before removing
+                                feedItem.style.transition = 'all 0.3s ease';
+                                feedItem.style.opacity = '0';
+                                feedItem.style.height = '0';
+                                
+                                setTimeout(() => {
+                                    feedItem.remove();
+                                }, 300);
+                            }
+                            
+                            // Clear feed content if it was the active feed
+                            if (feedItem && feedItem.classList.contains('active')) {
+                                currentFeedTitle.textContent = 'Select a Feed';
+                                feedContent.innerHTML = `
+                                    <div class="text-center text-muted py-5">
+                                        <i class="bi bi-arrow-left-circle display-4 mb-3"></i>
+                                        <p>Select a feed from the list to view its contents</p>
+                                    </div>
+                                `;
+                            }
+                            
+                            showToast('Feed deleted successfully and removed from storage!', 'success');
+                        })
+                        .catch(function(error) {
+                            clearTimeout(timeoutId);
+                            // Restore the item styling
+                            feedItem.classList.remove('text-muted');
+                            deleteBtn.disabled = false;
+                            deleteBtn.innerHTML = originalContent;
+                            
+                            const errorMessage = error.response?.data?.error || error.message || 'Unknown error';
+                            showToast('Error deleting feed: ' + errorMessage, 'danger');
+                            console.error('Feed deletion error:', error);
+                        });
+                }
+            }
         }
     }
 
     // Add a feed to the list - Updated to use query parameters
     function addFeedToList(feed) {
+        // Check if feed already exists in the list, if so, don't add it again
+        const existingItem = document.querySelector(`.feed-item[data-url="${feed.URL}"]`);
+        if (existingItem) {
+            existingItem.classList.add('highlight');
+            setTimeout(() => {
+                existingItem.classList.remove('highlight');
+            }, 2000);
+            return;
+        }
+        
         const li = document.createElement('li');
         li.className = 'list-group-item d-flex justify-content-between align-items-center feed-item';
         li.dataset.url = feed.URL;
@@ -266,8 +343,8 @@ document.addEventListener('DOMContentLoaded', function() {
         toast.setAttribute('aria-atomic', 'true');
         toast.innerHTML = `
             <div class="toast-header bg-${type} text-white">
-                <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
-                <strong class="me-auto">${type === 'success' ? 'Success' : type === 'danger' ? 'Error' : 'Information'}</strong>
+                <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                <strong class="me-auto">${type === 'success' ? 'Success' : type === 'danger' ? 'Error' : type === 'warning' ? 'Warning' : 'Information'}</strong>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
             <div class="toast-body">
