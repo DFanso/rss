@@ -8,7 +8,8 @@ A simple RSS reader and generator application built with Go.
 - Display feed content in a clean, modern UI
 - Export feeds in RSS format
 - Add, delete, and manage feeds
-- **Persistent storage of feeds in JSON format**
+- **Persistent storage of feed subscriptions**
+- **Always fetches fresh feed content** for up-to-date information
 - Dark mode support
 - Mobile-responsive design
 
@@ -57,7 +58,7 @@ You can also add default feeds at startup using the `-feeds` flag:
 
 ### Data Storage
 
-The application stores your feeds in a JSON file for persistence between restarts. By default, feeds are stored in `data/feeds.json`. You can specify a different data directory using the `-data` flag:
+The application stores your feed subscriptions in a JSON file for persistence between restarts. By default, subscriptions are stored in `data/feeds.json`. You can specify a different data directory using the `-data` flag:
 
 ```
 ./rss-reader -data /path/to/data
@@ -65,9 +66,9 @@ The application stores your feeds in a JSON file for persistence between restart
 
 The application will automatically:
 - Create the data directory if it doesn't exist
-- Load saved feeds when starting
-- Save feeds when they are added or removed
-- Provide feedback when feeds are saved or loaded
+- Load saved feed subscriptions when starting
+- Save feed subscriptions when they are added or removed
+- **Always fetch the latest feed content** when you view a feed, ensuring you get the most up-to-date information
 
 ## Development
 
@@ -78,14 +79,14 @@ The project structure is as follows:
 - `src/server`: HTTP server and API endpoints
 - `web/templates`: HTML templates
 - `web/static`: Static assets (CSS, JavaScript)
-- `data`: Feed storage (created at runtime)
+- `data`: Feed subscription storage (created at runtime)
 
 ## API Endpoints
 
 - `GET /`: Home page
 - `GET /feeds`: List all feeds
 - `POST /feeds`: Add a new feed
-- `GET /feed?url=...`: Get a specific feed
+- `GET /feed?url=...`: Get a specific feed (always fetches fresh content)
 - `DELETE /feed?url=...`: Remove a feed
 - `GET /export?url=...`: Export a feed in RSS format
 

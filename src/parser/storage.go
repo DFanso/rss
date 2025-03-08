@@ -11,6 +11,14 @@ import (
 	"time"
 )
 
+// FeedMetadata represents the essential information about a feed without its content
+type FeedMetadata struct {
+	URL         string    `json:"url"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	AddedAt     time.Time `json:"added_at"`
+}
+
 // Storage represents a storage for feeds with JSON file persistence
 type Storage struct {
 	feeds      map[string]*Feed
@@ -72,11 +80,10 @@ func (s *Storage) AddFeed(feed *Feed) error {
 
 	// Check if feed with this URL already exists
 	if existingFeed, ok := s.feeds[feed.URL]; ok {
-		// Update existing feed instead of adding a new one
+		// Update only metadata for existing feed
 		existingFeed.Title = feed.Title
 		existingFeed.Description = feed.Description
-		existingFeed.UpdatedAt = time.Now()
-		existingFeed.Items = feed.Items
+		// Don't update the items - we'll fetch them fresh each time
 
 		s.saveNeeded = true
 
@@ -90,8 +97,16 @@ func (s *Storage) AddFeed(feed *Feed) error {
 		return nil
 	}
 
-	// Add new feed
-	s.feeds[feed.URL] = feed
+	// Add new feed (only metadata is important for storage)
+	s.feeds[feed.URL] = &Feed{
+		URL:         feed.URL,
+		Title:       feed.Title,
+		Description: feed.Description,
+		UpdatedAt:   time.Now(),
+		// Don't store items - we'll fetch them fresh when needed
+		Items: nil,
+	}
+
 	s.saveNeeded = true
 
 	if s.autoSave {
@@ -105,31 +120,55 @@ func (s *Storage) AddFeed(feed *Feed) error {
 	return nil
 }
 
-// GetFeed gets a feed from the storage by URL
+// GetFeed gets a feed from the storage by URL and refreshes its content
 func (s *Storage) GetFeed(url string) (*Feed, error) {
 	if url == "" {
 		return nil, errors.New("URL cannot be empty")
 	}
 
 	s.mutex.RLock()
-	defer s.mutex.RUnlock()
+	storedFeed, ok := s.feeds[url]
+	s.mutex.RUnlock()
 
-	feed, ok := s.feeds[url]
 	if !ok {
 		return nil, errors.New("feed not found")
 	}
 
-	return feed, nil
+	// Always fetch fresh content for the feed
+	log.Printf("Fetching fresh content for feed: %s", url)
+	freshFeed, err := FetchFeed(url)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update stored feed metadata if needed
+	s.mutex.Lock()
+	storedFeed.Title = freshFeed.Title
+	storedFeed.Description = freshFeed.Description
+	storedFeed.UpdatedAt = time.Now()
+	s.mutex.Unlock()
+
+	// Return the fresh feed with content
+	return freshFeed, nil
 }
 
-// GetAllFeeds gets all feeds from the storage
+// GetAllFeeds gets all feeds from the storage (without their content)
 func (s *Storage) GetAllFeeds() []*Feed {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
 	feeds := make([]*Feed, 0, len(s.feeds))
 	for _, feed := range s.feeds {
-		feeds = append(feeds, feed)
+		// Create a copy without items to reduce memory usage
+		feedCopy := &Feed{
+			URL:         feed.URL,
+			Title:       feed.Title,
+			Description: feed.Description,
+			UpdatedAt:   feed.UpdatedAt,
+			// Don't include items - they'll be fetched when needed
+			Items: nil,
+		}
+		feeds = append(feeds, feedCopy)
 	}
 
 	return feeds
@@ -162,7 +201,7 @@ func (s *Storage) RemoveFeed(url string) error {
 	return nil
 }
 
-// SaveToFile saves all feeds to a JSON file
+// SaveToFile saves feed metadata to a JSON file
 func (s *Storage) SaveToFile() error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -175,14 +214,20 @@ func (s *Storage) SaveToFile() error {
 		}
 	}
 
-	// Convert feeds map to a slice for easier serialization
-	feedsSlice := make([]*Feed, 0, len(s.feeds))
+	// Convert feeds map to metadata for more efficient storage
+	metadataList := make([]FeedMetadata, 0, len(s.feeds))
 	for _, feed := range s.feeds {
-		feedsSlice = append(feedsSlice, feed)
+		metadata := FeedMetadata{
+			URL:         feed.URL,
+			Title:       feed.Title,
+			Description: feed.Description,
+			AddedAt:     feed.UpdatedAt,
+		}
+		metadataList = append(metadataList, metadata)
 	}
 
 	// Marshal to JSON
-	data, err := json.MarshalIndent(feedsSlice, "", "  ")
+	data, err := json.MarshalIndent(metadataList, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -202,11 +247,11 @@ func (s *Storage) SaveToFile() error {
 
 	s.lastSave = time.Now()
 	s.saveNeeded = false
-	log.Printf("Saved %d feeds to %s", len(feedsSlice), s.filePath)
+	log.Printf("Saved %d feed subscriptions to %s", len(metadataList), s.filePath)
 	return nil
 }
 
-// LoadFromFile loads feeds from a JSON file
+// LoadFromFile loads feed metadata from a JSON file
 func (s *Storage) LoadFromFile() error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -230,20 +275,27 @@ func (s *Storage) LoadFromFile() error {
 	}
 
 	// Unmarshal JSON
-	var feedsSlice []*Feed
-	if err := json.Unmarshal(data, &feedsSlice); err != nil {
+	var metadataList []FeedMetadata
+	if err := json.Unmarshal(data, &metadataList); err != nil {
 		return err
 	}
 
-	// Add feeds to storage
+	// Add feeds to storage from metadata
 	s.feeds = make(map[string]*Feed)
-	for _, feed := range feedsSlice {
-		if feed != nil && feed.URL != "" {
-			s.feeds[feed.URL] = feed
+	for _, metadata := range metadataList {
+		if metadata.URL != "" {
+			s.feeds[metadata.URL] = &Feed{
+				URL:         metadata.URL,
+				Title:       metadata.Title,
+				Description: metadata.Description,
+				UpdatedAt:   metadata.AddedAt,
+				// Don't load items - will fetch fresh when needed
+				Items: nil,
+			}
 		}
 	}
 
-	log.Printf("Loaded %d feeds from %s", len(feedsSlice), s.filePath)
+	log.Printf("Loaded %d feed subscriptions from %s", len(metadataList), s.filePath)
 	return nil
 }
 

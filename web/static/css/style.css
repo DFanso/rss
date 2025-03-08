@@ -26,6 +26,17 @@ p, span, div, h1, h2, h3, h4, h5, h6, a:not(.btn), li, label, input, textarea {
     color: var(--text-primary);
 }
 
+/* Spinning Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spin {
+    display: inline-block;
+    animation: spin 1.5s linear infinite;
+}
+
 /* Navbar Styles */
 .navbar {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -170,6 +181,19 @@ p, span, div, h1, h2, h3, h4, h5, h6, a:not(.btn), li, label, input, textarea {
 /* Preserve link colors within feed content */
 .feed-item-content a {
     color: var(--accent-color) !important;
+}
+
+/* Last updated info */
+.update-info {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    margin-left: 1rem;
+}
+
+.update-info i {
+    margin-right: 0.3rem;
 }
 
 /* Button Styles */

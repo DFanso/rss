@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (feedItems.length === 0) {
             showToast('Welcome! Add your first RSS feed to get started', 'info');
         } else {
-            showToast(`Loaded ${feedItems.length} saved feeds from storage`, 'success');
+            showToast(`Loaded ${feedItems.length} feed subscriptions`, 'success');
         }
     }
 
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(response) {
                 clearTimeout(timeoutId);
                 feedUrlInput.value = '';
-                showToast('Feed added successfully and saved to storage!', 'success');
+                showToast('Feed subscription added successfully!', 'success');
                 
                 // Add the new feed to the list
                 const feed = response.data;
@@ -137,13 +137,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load feed content - Updated to use query parameters
     function loadFeed(url) {
+        // Update feed title to show it's being refreshed
+        const feedTitle = document.querySelector(`.feed-item[data-url="${url}"] .feed-title`);
+        if (feedTitle) {
+            const originalTitle = feedTitle.innerHTML;
+            feedTitle.innerHTML = `<i class="bi bi-arrow-repeat me-2 spin"></i>${feedTitle.textContent}`;
+        }
+        
         // Show loading indicator
         feedContent.innerHTML = `
             <div class="text-center py-5">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="mt-3 text-muted">Loading feed content...</p>
+                <p class="mt-3 text-muted">Fetching latest feed content...</p>
+                <small class="text-muted">Content is always freshly loaded to ensure you see the latest updates</small>
             </div>
         `;
         
@@ -161,7 +169,21 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(response) {
                 clearTimeout(timeoutId);
                 const feed = response.data;
-                currentFeedTitle.textContent = feed.Title;
+                
+                // Update displayed title with freshness indicator
+                const lastUpdated = new Date().toLocaleTimeString();
+                currentFeedTitle.innerHTML = `
+                    ${feed.Title} 
+                    <small class="ms-2 text-muted">
+                        <i class="bi bi-clock-history"></i> 
+                        Updated at ${lastUpdated}
+                    </small>
+                `;
+                
+                // Restore original feed list item title
+                if (feedTitle) {
+                    feedTitle.innerHTML = `<i class="bi bi-rss me-2"></i>${feed.Title}`;
+                }
                 
                 let html = '';
                 if (feed.Items && feed.Items.length > 0) {
@@ -223,6 +245,12 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(function(error) {
                 clearTimeout(timeoutId);
+                
+                // Restore original feed list item title
+                if (feedTitle) {
+                    feedTitle.innerHTML = `<i class="bi bi-rss me-2"></i>${feedTitle.textContent.trim()}`;
+                }
+                
                 const errorMessage = error.response?.data?.error || error.message || 'Unknown error';
                 showToast('Error loading feed: ' + errorMessage, 'danger');
                 console.error('Feed loading error:', error);
@@ -237,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Delete a feed - Updated to use query parameters
     function deleteFeed(url) {
-        if (confirm('Are you sure you want to delete this feed? This will remove it permanently from storage.')) {
+        if (confirm('Are you sure you want to remove this feed subscription?')) {
             const feedItem = document.querySelector(`.feed-item[data-url="${url}"]`);
             if (feedItem) {
                 // Add "deleting" visual feedback
@@ -282,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 `;
                             }
                             
-                            showToast('Feed deleted successfully and removed from storage!', 'success');
+                            showToast('Feed subscription removed successfully!', 'success');
                         })
                         .catch(function(error) {
                             clearTimeout(timeoutId);
@@ -292,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             deleteBtn.innerHTML = originalContent;
                             
                             const errorMessage = error.response?.data?.error || error.message || 'Unknown error';
-                            showToast('Error deleting feed: ' + errorMessage, 'danger');
+                            showToast('Error removing feed: ' + errorMessage, 'danger');
                             console.error('Feed deletion error:', error);
                         });
                 }
