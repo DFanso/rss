@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .title }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -12,14 +13,14 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">RSS Reader</a>
+            <a class="navbar-brand" href="/"><i class="bi bi-rss-fill me-2"></i>RSS Reader</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
+                        <a class="nav-link" href="/"><i class="bi bi-house-door me-1"></i>Home</a>
                     </li>
                 </ul>
             </div>
@@ -27,35 +28,40 @@
     </nav>
 
     <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-4">
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-5">
                 <div class="card mb-4">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="bi bi-plus-circle me-2"></i>
                         <h5>Add New Feed</h5>
                     </div>
                     <div class="card-body">
                         <form id="add-feed-form">
                             <div class="mb-3">
                                 <label for="feed-url" class="form-label">Feed URL</label>
-                                <input type="url" class="form-control" id="feed-url" required>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+                                    <input type="url" class="form-control" id="feed-url" placeholder="https://example.com/feed.xml" required>
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Add Feed</button>
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-2"></i>Add Feed</button>
                         </form>
                     </div>
                 </div>
 
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="bi bi-bookmarks me-2"></i>
                         <h5>My Feeds</h5>
                     </div>
-                    <div class="card-body">
-                        <ul class="list-group" id="feed-list">
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush" id="feed-list">
                             {{range .feeds}}
                             <li class="list-group-item d-flex justify-content-between align-items-center feed-item" data-url="{{.URL}}">
-                                <span class="feed-title">{{.Title}}</span>
-                                <div>
-                                    <a href="/export?url={{.URL}}" class="btn btn-sm btn-outline-secondary" target="_blank">RSS</a>
-                                    <button class="btn btn-sm btn-danger delete-feed" data-url="{{.URL}}">Delete</button>
+                                <span class="feed-title"><i class="bi bi-rss me-2"></i>{{.Title}}</span>
+                                <div class="feed-actions">
+                                    <a href="/export?url={{.URL}}" class="btn btn-sm btn-outline-secondary" target="_blank" title="View RSS"><i class="bi bi-box-arrow-up-right"></i></a>
+                                    <button class="btn btn-sm btn-danger delete-feed" data-url="{{.URL}}" title="Delete Feed"><i class="bi bi-trash"></i></button>
                                 </div>
                             </li>
                             {{end}}
@@ -64,20 +70,30 @@
                 </div>
             </div>
 
-            <div class="col-md-8">
+            <div class="col-lg-8 col-md-7">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="bi bi-collection me-2"></i>
                         <h5 id="current-feed-title">Select a Feed</h5>
                     </div>
                     <div class="card-body">
                         <div id="feed-content">
-                            <p class="text-center text-muted">Select a feed from the list to view its contents</p>
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-arrow-left-circle display-4 mb-3"></i>
+                                <p>Select a feed from the list to view its contents</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <footer class="mt-5 py-4 text-center text-secondary">
+        <div class="container">
+            <small>&copy; 2025 RSS Reader. Made with <i class="bi bi-heart-fill text-danger"></i> by <a href="https://github.com/dfanso" target="_blank">DFanso</a></small>
+        </div>
+    </footer>
 
     <script src="/static/js/app.js"></script>
 </body>
