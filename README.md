@@ -10,8 +10,10 @@ A simple RSS reader and generator application built with Go.
 - Add, delete, and manage feeds
 - **Persistent storage of feed subscriptions**
 - **Always fetches fresh feed content** for up-to-date information
-- Dark mode support
+- Modern dark theme with Tailwind CSS
+- Reactive UI with HTMX (no JavaScript frameworks needed)
 - Mobile-responsive design
+- Fast, lightweight frontend
 
 ## Requirements
 
@@ -76,10 +78,17 @@ The project structure is as follows:
 
 - `cmd/rss`: Main application entry point
 - `src/parser`: RSS parsing and storage logic
-- `src/server`: HTTP server and API endpoints
-- `web/templates`: HTML templates
-- `web/static`: Static assets (CSS, JavaScript)
+- `src/server`: HTTP server and API endpoints with HTMX support
+- `web/templates`: HTML templates with Tailwind CSS and HTMX
 - `data`: Feed subscription storage (created at runtime)
+
+### Technology Stack
+
+- **Backend**: Go with Gin web framework
+- **Frontend**: HTMX for reactive interactions
+- **Styling**: Tailwind CSS for modern, responsive design
+- **Storage**: JSON file-based persistence
+- **Icons**: Bootstrap Icons
 
 ## API Endpoints
 
