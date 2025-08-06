@@ -1,50 +1,62 @@
 [
   {
+    "url": "https://www.reddit.com/r/theprimeagen/.rss",
+    "title": "theprimeagen",
+    "description": "All things theprimeagen and duckndiving",
+    "added_at": "2025-03-09T12:27:38.2570129+05:30"
+  },
+  {
     "url": "https://economynext.com/rss",
     "title": "EconomyNext",
     "description": "EconomyNext",
-    "added_at": "2025-03-08T21:37:32.2004856+05:30"
+    "added_at": "2025-03-09T09:40:56.246223+05:30"
   },
   {
     "url": "https://www.reddit.com/r/TKASYLUM/.rss",
     "title": "TKASYLUM",
     "description": "Here we post custom memes , vids and enjoy the contents !! feel free to join ChootyGang !!",
-    "added_at": "2025-03-08T21:47:37.8564849+05:30"
-  },
-  {
-    "url": "https://www.reddit.com/r/srilanka/.rss",
-    "title": "Sri Lanka",
-    "description": "The English-Language Subreddit for Sri Lanka",
-    "added_at": "2025-03-08T22:25:48.5723777+05:30"
-  },
-  {
-    "url": "https://www.dailymirror.lk/rss/breaking_news/108",
-    "title": "www.dailymirror.lk",
-    "description": "The only Sri Lankan newspaper with round the clock news updates - Dailymirror Online Edition",
-    "added_at": "2025-03-08T22:46:28.3936855+05:30"
-  },
-  {
-    "url": "https://feeds.feedburner.com/TheHackersNews",
-    "title": "The Hacker News",
-    "description": "Most trusted, widely-read independent cybersecurity news source for everyone; supported by hackers and IT professionals — Send TIPs to admin@thehackernews.com",
-    "added_at": "2025-03-08T22:49:02.4628437+05:30"
+    "added_at": "2025-03-10T09:10:10.9263653+05:30"
   },
   {
     "url": "https://www.cbsl.gov.lk/en/statistics/economic-indicators/weirss",
     "title": "Central Bank of Sri Lanka",
     "description": "",
-    "added_at": "2025-03-08T21:42:27.2949906+05:30"
-  },
-  {
-    "url": "https://memebase.cheezburger.com/rss",
-    "title": "Memebase",
-    "description": "Funny memes that \"GET IT\" and want you to too. Get the latest funniest memes and keep up what is going on in the meme-o-sphere.",
-    "added_at": "2025-03-08T22:41:39.1450879+05:30"
+    "added_at": "2025-03-09T09:40:52.9005355+05:30"
   },
   {
     "url": "https://knowyourmeme.com/newsfeed.rss",
     "title": "Know Your Meme Newsfeed",
     "description": "New items added to the News Feed",
-    "added_at": "2025-03-08T22:46:03.2965543+05:30"
+    "added_at": "2025-03-09T09:38:01.9023072+05:30"
+  },
+  {
+    "url": "https://www.reddit.com/r/srilanka/.rss",
+    "title": "Sri Lanka",
+    "description": "The English-Language Subreddit for Sri Lanka",
+    "added_at": "2025-04-23T23:15:38.9620521+05:30"
+  },
+  {
+    "url": "https://www.dailymirror.lk/rss/breaking_news/108",
+    "title": "www.dailymirror.lk",
+    "description": "The only Sri Lankan newspaper with round the clock news updates - Dailymirror Online Edition",
+    "added_at": "2025-04-23T23:15:43.2184685+05:30"
+  },
+  {
+    "url": "https://status.anthropic.com/history.atom",
+    "title": "Anthropic Status - Incident History",
+    "description": "",
+    "added_at": "2025-04-23T23:13:06.9671912+05:30"
+  },
+  {
+    "url": "https://feeds.feedburner.com/TheHackersNews",
+    "title": "The Hacker News",
+    "description": "Most trusted, widely-read independent cybersecurity news source for everyone; supported by hackers and IT professionals — Send TIPs to admin@thehackernews.com",
+    "added_at": "2025-03-09T09:40:50.4545903+05:30"
+  },
+  {
+    "url": "https://memebase.cheezburger.com/rss",
+    "title": "Memebase",
+    "description": "Funny memes that \"GET IT\" and want you to too. Get the latest funniest memes and keep up what is going on in the meme-o-sphere.",
+    "added_at": "2025-03-09T12:27:42.7031049+05:30"
   }
 ]
