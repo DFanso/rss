@@ -4,99 +4,421 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .title }}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-bg': '#121212',
+                        'dark-card': '#1e1e1e',
+                        'dark-card-header': '#252525',
+                        'dark-hover': '#2a2a2a',
+                        'dark-active': '#333333',
+                        'dark-text': '#e0e0e0',
+                        'dark-text-secondary': '#a0a0a0',
+                        'dark-border': '#333333'
+                    },
+                    animation: {
+                        'spin-slow': 'spin 1.5s linear infinite',
+                        'pulse-highlight': 'pulse-highlight 2s ease',
+                        'slide-in': 'slide-in 0.3s ease-out',
+                        'slide-out': 'slide-out 0.3s ease-in'
+                    },
+                    keyframes: {
+                        'pulse-highlight': {
+                            '0%': { backgroundColor: '#1e1e1e' },
+                            '50%': { backgroundColor: 'rgba(59, 130, 246, 0.25)' },
+                            '100%': { backgroundColor: '#1e1e1e' }
+                        },
+                        'slide-in': {
+                            '0%': { transform: 'translateX(100%)' },
+                            '100%': { transform: 'translateX(0)' }
+                        },
+                        'slide-out': {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(100%)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        /* HTMX loading states */
+        .htmx-request { opacity: 0.5; }
+        .htmx-request .htmx-indicator { opacity: 1; }
+        .htmx-indicator { opacity: 0; transition: opacity 0.3s; }
+        
+        /* Custom scrollbar for dark theme */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #404040;
+        }
+
+        /* Feed content styling */
+        .feed-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem auto;
+            display: block;
+        }
+        
+        .feed-content a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+        
+        .feed-content a:hover {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+
+        .feed-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .feed-content h1, .feed-content h2, .feed-content h3, .feed-content h4, .feed-content h5, .feed-content h6 {
+            color: #e0e0e0;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .feed-content ul, .feed-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feed-content blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+            color: #a0a0a0;
+        }
+
+        /* Line clamp utility */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/"><i class="bi bi-rss-fill me-2"></i>RSS Reader</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="bi bi-house-door me-1"></i>Home</a>
-                    </li>
-                </ul>
+<body class="dark bg-dark-bg text-dark-text font-sans min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-900 shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center text-white font-semibold text-lg tracking-wide">
+                        <i class="bi bi-rss-fill mr-2 text-blue-400"></i>
+                        RSS Reader
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="/" class="text-gray-300 hover:text-white flex items-center transition-colors">
+                        <i class="bi bi-house-door mr-1"></i>
+                        Home
+                    </a>
+                </div>
+                <!-- Mobile menu button -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white">
+                    <i class="bi bi-list text-xl"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid mt-4">
-        <div class="row">
-            <div class="col-lg-3 col-md-4 sidebar-column">
-                <div class="card mb-4">
-                    <div class="card-header d-flex align-items-center">
-                        <i class="bi bi-plus-circle me-2"></i>
-                        <h5>Add New Feed</h5>
+    <!-- Main Container -->
+    <div class="flex flex-col lg:flex-row min-h-[calc(100vh-4rem)]">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-full lg:w-96 bg-dark-bg border-r border-dark-border transform lg:transform-none transition-transform duration-300 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar">
+            <div class="p-4 lg:p-6 space-y-4 lg:space-y-6">
+                <!-- Add Feed Form -->
+                <div class="bg-dark-card rounded-xl shadow-lg border border-dark-border overflow-hidden">
+                    <div class="bg-dark-card-header px-4 lg:px-6 py-3 lg:py-4 border-b border-dark-border">
+                        <h2 class="flex items-center text-base lg:text-lg font-semibold text-dark-text">
+                            <i class="bi bi-plus-circle mr-2 text-green-400"></i>
+                            Add New Feed
+                        </h2>
                     </div>
-                    <div class="card-body">
-                        <form id="add-feed-form">
-                            <div class="mb-3">
-                                <label for="feed-url" class="form-label">Feed URL</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                                    <input type="url" class="form-control" id="feed-url" placeholder="https://example.com/feed.xml" required>
+                    <div class="p-4 lg:p-6">
+                        <form hx-post="/feeds" 
+                              hx-target="#feed-list" 
+                              hx-swap="beforeend"
+                              hx-on::after-request="this.reset(); showToast('Feed subscription added successfully!', 'success')"
+                              class="space-y-4">
+                            <div>
+                                <label for="feed-url" class="block text-sm font-medium text-dark-text mb-2">
+                                    Feed URL
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="bi bi-link-45deg text-dark-text-secondary"></i>
+                                    </div>
+                                    <input type="url" 
+                                           id="feed-url" 
+                                           name="url"
+                                           class="block w-full pl-10 pr-3 py-2.5 border border-dark-border rounded-lg bg-gray-800 text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm" 
+                                           placeholder="https://example.com/feed.xml" 
+                                           required>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-2"></i>Add Feed</button>
+                            <button type="submit" 
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-lg hover:shadow-xl">
+                                <span class="htmx-indicator flex items-center justify-center">
+                                    <i class="bi bi-arrow-repeat animate-spin-slow mr-2"></i>
+                                    Adding...
+                                </span>
+                                <span class="htmx-request:hidden flex items-center justify-center">
+                                    <i class="bi bi-plus-lg mr-2"></i>
+                                    Add Feed
+                                </span>
+                            </button>
                         </form>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header d-flex align-items-center">
-                        <i class="bi bi-bookmarks me-2"></i>
-                        <h5>My Feeds</h5>
+                <!-- Feeds List -->
+                <div class="bg-dark-card rounded-xl shadow-lg border border-dark-border overflow-hidden flex-1">
+                    <div class="bg-dark-card-header px-4 lg:px-6 py-3 lg:py-4 border-b border-dark-border">
+                        <h2 class="flex items-center text-base lg:text-lg font-semibold text-dark-text">
+                            <i class="bi bi-bookmarks mr-2 text-yellow-400"></i>
+                            My Feeds
+                        </h2>
                     </div>
-                    <div class="card-body p-0">
-                        <ul class="list-group list-group-flush" id="feed-list">
+                    <div class="flex-1 overflow-y-auto custom-scrollbar" style="max-height: calc(100vh - 400px);">
+                        <ul id="feed-list">
                             {{range .feeds}}
-                            <li class="list-group-item d-flex justify-content-between align-items-center feed-item" data-url="{{.URL}}">
-                                <span class="feed-title"><i class="bi bi-rss me-2"></i>{{.Title}}</span>
-                                <div class="feed-actions">
-                                    <a href="/export?url={{.URL}}" class="btn btn-sm btn-outline-secondary" target="_blank" title="View RSS"><i class="bi bi-box-arrow-up-right"></i></a>
-                                    <button class="btn btn-sm btn-danger delete-feed" data-url="{{.URL}}" title="Delete Feed"><i class="bi bi-trash"></i></button>
+                            <li class="feed-item hover:bg-dark-hover cursor-pointer transition-all duration-200 group border-b border-dark-border last:border-b-0"
+                                hx-get="/feed?url={{.URL}}"
+                                hx-target="#feed-content"
+                                hx-indicator="#loading-indicator"
+                                onclick="setActiveFeed(this)">
+                                <div class="px-4 lg:px-6 py-3 lg:py-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start space-x-3 flex-1 min-w-0">
+                                            <i class="bi bi-rss text-blue-400 flex-shrink-0 mt-0.5"></i>
+                                            <div class="flex-1 min-w-0">
+                                                <h3 class="text-dark-text font-medium text-sm leading-tight mb-1 line-clamp-2">{{.Title}}</h3>
+                                                <p class="text-dark-text-secondary text-xs truncate">{{.URL}}</p>
+                                            </div>
+                                        </div>
+                                        <div class="feed-actions flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
+                                            <a href="/export?url={{.URL}}" 
+                                               target="_blank" 
+                                               title="View RSS Feed"
+                                               onclick="event.stopPropagation()"
+                                               class="p-2 text-dark-text-secondary hover:text-blue-400 transition-colors rounded hover:bg-dark-hover">
+                                                <i class="bi bi-box-arrow-up-right text-sm"></i>
+                                            </a>
+                                            <button hx-delete="/feed?url={{.URL}}"
+                                                    hx-target="closest li"
+                                                    hx-swap="outerHTML"
+                                                    hx-confirm="Are you sure you want to remove this feed subscription?"
+                                                    title="Delete Feed"
+                                                    onclick="event.stopPropagation()"
+                                                    class="p-2 text-dark-text-secondary hover:text-red-400 transition-colors rounded hover:bg-dark-hover">
+                                                <i class="bi bi-trash text-sm"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </li>
                             {{end}}
                         </ul>
+                        {{if not .feeds}}
+                        <div class="p-8 text-center text-dark-text-secondary">
+                            <i class="bi bi-rss text-4xl mb-3 opacity-50"></i>
+                            <p class="text-sm">No feeds added yet</p>
+                            <p class="text-xs mt-1 opacity-75">Add your first feed above</p>
+                        </div>
+                        {{end}}
                     </div>
                 </div>
             </div>
+        </aside>
 
-            <div class="col-lg-9 col-md-8 content-column">
-                <div class="content-container">
-                    <div class="card">
-                        <div class="card-header d-flex align-items-center">
-                            <i class="bi bi-collection me-2"></i>
-                            <h5 id="current-feed-title">Select a Feed</h5>
+        <!-- Main Content Area -->
+        <main class="flex-1 lg:overflow-hidden">
+            <div class="h-full p-6">
+                <div class="max-w-5xl mx-auto h-full">
+                    <div class="bg-dark-card rounded-xl shadow-lg border border-dark-border overflow-hidden h-full flex flex-col">
+                        <div class="bg-dark-card-header px-6 py-4 border-b border-dark-border flex-shrink-0">
+                            <h2 id="current-feed-title" class="flex items-center text-lg font-semibold text-dark-text">
+                                <i class="bi bi-collection mr-2 text-purple-400"></i>
+                                Select a Feed
+                            </h2>
                         </div>
-                        <div class="card-body">
-                            <div id="feed-content">
-                                <div class="text-center text-muted py-5">
-                                    <i class="bi bi-arrow-left-circle display-4 mb-3"></i>
-                                    <p>Select a feed from the list to view its contents</p>
+                        <div class="flex-1 relative overflow-hidden">
+                            <div id="feed-content" class="h-full overflow-y-auto custom-scrollbar p-6">
+                                <div class="flex flex-col items-center justify-center h-full text-center text-dark-text-secondary">
+                                    <i class="bi bi-arrow-left-circle text-6xl mb-4 text-blue-400 opacity-50"></i>
+                                    <p class="text-lg mb-2">Select a feed from the list to view its contents</p>
+                                    <p class="text-sm opacity-75">Fresh content will be loaded automatically</p>
                                 </div>
+                            </div>
+                            
+                            <!-- Loading indicator -->
+                            <div id="loading-indicator" class="htmx-indicator absolute inset-0 bg-dark-card bg-opacity-90 flex flex-col items-center justify-center text-center backdrop-blur-sm">
+                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                                <p class="text-dark-text-secondary text-lg">Fetching latest feed content...</p>
+                                <p class="text-sm text-dark-text-secondary mt-2">Content is always freshly loaded to ensure you see the latest updates</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <footer class="mt-5 py-4 text-center text-secondary">
-        <div class="container">
-            <small>&copy; 2025 RSS Reader. Made with <i class="bi bi-heart-fill text-danger"></i> by <a href="https://github.com/dfanso" target="_blank">DFanso</a></small>
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-20 right-5 z-50 space-y-2"></div>
+
+    <!-- Footer -->
+    <footer class="bg-dark-card border-t border-dark-border py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-dark-text-secondary">
+            <small>&copy; 2025 RSS Reader. Made with <i class="bi bi-heart-fill text-red-500"></i> by <a href="https://github.com/dfanso" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors">DFanso</a></small>
         </div>
     </footer>
 
-    <script src="/static/js/app.js"></script>
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // Set active feed styling
+        function setActiveFeed(element) {
+            // Remove active class from all feeds
+            document.querySelectorAll('.feed-item').forEach(item => {
+                item.classList.remove('bg-dark-active', 'border-l-4', 'border-blue-500');
+            });
+            
+            // Add active class to clicked feed
+            element.classList.add('bg-dark-active', 'border-l-4', 'border-blue-500');
+            
+            // Close mobile sidebar after selection
+            if (window.innerWidth < 1024) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        }
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-600' : 
+                           type === 'error' ? 'bg-red-600' : 
+                           type === 'warning' ? 'bg-yellow-600' : 'bg-blue-600';
+            
+            const icon = type === 'success' ? 'bi-check-circle' :
+                        type === 'error' ? 'bi-exclamation-triangle' :
+                        type === 'warning' ? 'bi-exclamation-circle' : 'bi-info-circle';
+
+            toast.className = `${bgColor} text-white p-4 rounded-lg shadow-lg flex items-center space-x-3 transform transition-all duration-300 translate-x-full max-w-sm`;
+            toast.innerHTML = `
+                <i class="bi ${icon} flex-shrink-0"></i>
+                <span class="flex-1 text-sm">${message}</span>
+                <button onclick="this.parentElement.remove()" class="flex-shrink-0 text-white hover:text-gray-200 ml-2">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            `;
+
+            document.getElementById('toast-container').appendChild(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 100);
+
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // HTMX event listeners
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            let errorMsg = 'Unknown error occurred';
+            try {
+                const response = JSON.parse(evt.detail.xhr.response);
+                errorMsg = response.error || errorMsg;
+            } catch (e) {
+                errorMsg = evt.detail.xhr.statusText || errorMsg;
+            }
+            showToast(errorMsg, 'error');
+        });
+
+        document.body.addEventListener('htmx:sendError', function(evt) {
+            showToast('Network error - please check your connection', 'error');
+        });
+
+        document.body.addEventListener('htmx:timeout', function(evt) {
+            showToast('Request timed out - please try again', 'warning');
+        });
+
+        // Update feed title when content loads
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.target.id === 'feed-content') {
+                const activeItem = document.querySelector('.feed-item.bg-dark-active');
+                if (activeItem) {
+                    const feedTitle = activeItem.querySelector('h3').textContent.trim();
+                    const now = new Date().toLocaleTimeString();
+                    document.getElementById('current-feed-title').innerHTML = `
+                        <i class="bi bi-collection mr-2 text-purple-400"></i>
+                        <span class="truncate">${feedTitle}</span>
+                        <small class="ml-2 text-dark-text-secondary hidden sm:inline">
+                            <i class="bi bi-clock-history"></i>
+                            Updated at ${now}
+                        </small>
+                    `;
+                }
+            }
+        });
+
+        // Check stored feeds on load
+        window.addEventListener('load', function() {
+            const feedItems = document.querySelectorAll('.feed-item');
+            if (feedItems.length === 0) {
+                showToast('Welcome! Add your first RSS feed to get started', 'info');
+            } else {
+                showToast(`Loaded ${feedItems.length} feed subscriptions`, 'success');
+            }
+        });
+
+        // Initialize mobile sidebar state
+        if (window.innerWidth < 1024) {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth >= 1024) {
+                sidebar.classList.remove('-translate-x-full');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+    </script>
 </body>
-</html> 
+</html>
